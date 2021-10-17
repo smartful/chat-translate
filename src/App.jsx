@@ -1,16 +1,12 @@
 import React, { useState } from 'react';
+import translate from "translate";
 import './App.css';
 
-export interface IMessage {
-  text: string;
-  index: number;
-}
+const App = () => {
+  const [inputMessage, setInputMessage] = useState('');
+  const [messages, setMessages] = useState([]);
 
-const App: React.FC = () => {
-  const [inputMessage, setInputMessage] = useState<string>('');
-  const [messages, setMessages] = useState<IMessage[]>([]);
-
-  const inputStyle: React.CSSProperties = {
+  const inputStyle = {
     width: '30rem',
     height: '1rem',
     padding: '1rem',
@@ -20,8 +16,8 @@ const App: React.FC = () => {
     placeContent: 'center',
   };
 
-  const btnStyle: React.CSSProperties = {
-    width: '15rem',
+  const btnStyle = {
+    width: '14rem',
     padding: '1rem',
     margin: '1rem',
     display: 'flex',
@@ -29,7 +25,7 @@ const App: React.FC = () => {
     placeContent: 'center',
   };
 
-  const msgStyle: React.CSSProperties = {
+  const msgStyle = {
     backgroundColor: '#222299',
     color: 'white',
     width: '30rem',
@@ -41,10 +37,28 @@ const App: React.FC = () => {
     borderRadius: '2rem',
   };
 
-  const handleSubmit: (event: React.FormEvent) => void = (event: React.FormEvent) => {
-    event?.preventDefault();
-    setMessages([...messages, { text: inputMessage, index: messages.length}]);
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setMessages([
+      ...messages,
+      {
+        text: inputMessage,
+        index: messages.length
+      }
+    ]);
     setInputMessage('');
+  }
+
+  const toTranslate = async () => {
+    const translatedMessages = await Promise.all(messages.map(async (element) => {
+      const translatedText = await translate(element.text, { from: 'fr', to: "en" });
+      const newMessage = {
+        text: translatedText,
+        index: element.index,
+      };
+      return newMessage;
+    }));
+    setMessages(translatedMessages);
   }
 
   return (
@@ -52,6 +66,7 @@ const App: React.FC = () => {
       <form onSubmit={handleSubmit}>
         <input type='text' style={inputStyle} value={inputMessage} onChange={(e) => setInputMessage(e.target.value)} />
         <button type='submit' style={btnStyle}>Ajouter un message</button>
+        <button style={btnStyle} onClick={toTranslate}>Traduire en anglais</button>
       </form>
 
       <div style={msgStyle}>
